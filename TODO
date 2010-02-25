@@ -1,0 +1,10 @@
+- detect image type from actual file and not the extension
+- move stuff like md5, strtolower, and addslashes into user.inc
+- add timeout for zombie games
+- Different types of games (regular, zombies, circle of death) with different rules
+
+- Game admin is not automatically enrolled in the game
+- add wrapper to mysql_query to automatically output/log all SQL errors
+- test if a user doesn't confirm their account and just logs in
+- figure out what asn_pas does and if it's needed
+- Games can be empty (but not started without at least 3 people!)
