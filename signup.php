@@ -7,20 +7,6 @@ include_once("util.inc");
 
 requireNoLogin();
 
-function phplog($message) {
-	// open file
-	$fd = fopen("/var/www/logs/php.log", "a");
-
-	// append date/time to message
-	$str = "[" . date("Y/m/d h:i:s", mktime()) . "] $message";
-
-	// write string
-	fwrite($fd, $str . "\n");
-
-	// close file
-	fclose($fd);
-}
-
 $what = 1;
 if (isset($_POST['signup'])) {
 	if (strtolower($_POST['check']) != strtolower($_SESSION['key']))

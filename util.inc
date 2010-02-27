@@ -155,12 +155,29 @@
 		return null;
 	}
 
+  function phplog($message) {
+    // open file
+    $fd = fopen("/var/www/logs/php.log", "a");
+
+    // append date/time to message
+    $str = "[" . date("Y/m/d h:i:s", mktime()) . "] $message";
+
+    // write string
+    fwrite($fd, $str . "\n");
+
+    // close file
+    fclose($fd);
+  }
+
   function mailPlayers($players, $subject, $message, $printEmail=false) {
     foreach ($players as $player) {
       $success = mail($player->getEmail(), $subject, $message, "From: taylor.assassins@gmail.com");
+      $successMessage = "mail ".($success?"successfully":"<b>unsuccessfully</b>")." sent to {$player->getUsername()}<br>";
+
+      phplog($successMessage);
 
       if ($printEmail)
-        print "mail ".($success?"successfully":"<b>unsuccessfully</b>")." sent to {$player->getUsername()}<br>";
+        print $successMessage;
     }
   }
 

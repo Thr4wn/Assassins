@@ -24,7 +24,7 @@ else if (!$sending_user)
 else if ($_POST['send']) {
   $subject = $_POST['subject'];
   $emessage = $_POST['message']."\n\n- {$sending_user->getUsername()}";
-	mailPlayers($game->getPlayers(), $subject, $emessage);
+	mailPlayers($game->getPlayers(), $subject, $emessage, true);
   $message = "Message sent";
 } else
   $showform = true;

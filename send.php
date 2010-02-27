@@ -33,7 +33,7 @@ if(isset($_POST['submit'])) {
 		setError("One or more fields were left blank.");
 
 	// sending error
-	else if(!mail("denaje+assassins@gmail.com",
+	else if(!mail("taylor.assassins@gmail.com",
 			"Assassins question...",
 			"Subject: $subject\nFrom: {$user->getUsername()} ({$user->getEmail()})\n\n$emailMessage",
 			"From: ".$user->getEmail()))

@@ -39,7 +39,7 @@ if ($game) {
   if ($game->started() && !$game->ended() && $game->isPlayer($user)) {
     if ($game->getType() == Game::REGULAR)
       echo "&middot; <a href='ami.php?game=$id'>check</a> if you are the assassin<br/>";
-    else if ($game->getType() == Game::CIRCLED)
+    else if ($game->getType() == Game::CIRCLED && !$game->isDead($user))
       echo "&middot; <a href='ami.php?game=$id'>check</a> who your target is<br/>";
   }
 
