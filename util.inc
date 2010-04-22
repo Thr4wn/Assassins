@@ -2,7 +2,7 @@
 	$_SESSION['err'] = array();
 
 	include_once("user.inc");
-  include_once("config.inc");
+  include_once("config.php");
 
 	function pluralize($word,$count) {
 		return ($count==1)?$word:$word."s";
@@ -157,7 +157,7 @@
 
   function phplog($message) {
     // open file
-    $fd = fopen("/var/www/logs/php.log", "a");
+    $fd = fopen("../logs/php.log", "a");
 
     // append date/time to message
     $str = "[" . date("Y/m/d h:i:s", mktime()) . "] $message";
@@ -183,11 +183,16 @@
 
 	function send_setup_email($email,$pass) {
 
-		mail($_POST['email'],
+		$success = mail($email,
 			"Assassins Signup",
 			"An assassins account has been created with this email address.\n".
 				"To unlock your account, please go to:\n".
-				"http://assassins.homelinux.org/assassins/signup.php?unlock=$pass",
+				"http://cse.taylor.edu/~jdenardo/assassins/signup.php?unlock=$pass",
 			"From: taylor.assassins@gmail.com");
+
+      $successMessage = "mail ".($success?"successfully":"<b>unsuccessfully</b>")." sent to {$email}<br>";
+
+      phplog($successMessage);
+      print $successMessage;
 	}
 ?>

@@ -1,5 +1,5 @@
 <?php
-	include_once("config.inc");
+	include_once("config.php");
 
 	$connection = mysql_connect($_CONFIG['db_serv'],$_CONFIG['db_user'],$_CONFIG['db_pass'])
 		or die("<b>Could not connect to database.</b>");

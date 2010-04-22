@@ -13,10 +13,10 @@ include("top.php");
 
 <h2>Notice from the site admin</h2>
 <p>
-Welcome to the new Assassins server! We just built this thing yesterday, and the foundation's very weak, so please <a href="send.php">let me know</a> if you encounter any bugs, error messages, unexpected behavior, or other site-related problems.
+Welcome to the new Assassins server! Please <a href="send.php">let me know</a> if you encounter any bugs, error messages, unexpected behavior, or other site-related problems.
 </p>
 <p>
-Do not refer to cse.taylor.edu/~jdenardo anymore. Instead, you should be going directly to assassins.homelinux.org.
+Update: I am currently working on two new game types: Last Man Standing (basically a free-for-all) and Teams. Last Man Standing (which hilariously shares an acronym with <a href="http://en.wikipedia.org/wiki/Least_mean_squares_filter">Least Mean Squares</a>...) is the easiest, so I'm working on that first.
 </p>
 
 <?php
@@ -89,8 +89,10 @@ if ($num > 0) {
 
 <br><br>
 
+<!--
 <div class="create">
 	<a href="create.php">Create</a> a new game.
 </div>
+-->
 
 <? include("bottom.php"); ?>
