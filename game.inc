@@ -11,6 +11,7 @@ class Game {
   private $gametype;
   private $started;
   private $ended;
+  private $hidden;
   private $num_tot;
   private $num_dead;
   private $num_alive;
@@ -50,6 +51,7 @@ class Game {
     $this->gametype = $row['type'];
     $this->started = $row['started'];
     $this->ended = $row['ended'];
+    $this->hidden = $row['hidden'];
 
     $this->dead_players = array();
     $this->alive_players = array();
@@ -58,24 +60,24 @@ class Game {
     $this->kill_count = array();
     $this->infestation_count = array();
     $result = sql(
-        "SELECT user_id,died,assassin,kills,infestations ".
+        "SELECT username,died,assassin,kills,infestations ".
         "FROM a_ingame ".
         "WHERE game=$game_id ".
-        "ORDER BY died DESC, user_id ASC "
+        "ORDER BY died DESC, username ASC "
         );
     while ($row = mysql_fetch_array($result)) {
-      $player_id = $row['user_id'];
+      $player_username = $row['username'];
 
       if ($row['died'])
-        $this->addDeadPlayer($player_id,$row['died']);
+        $this->addDeadPlayer($player_username,$row['died']);
       else
-        $this->addAlivePlayer($player_id);
+        $this->addAlivePlayer($player_username);
 
       if ($row['assassin'])
-        $this->assassins[] = $player_id;
+        $this->assassins[] = $player_username;
 
-      $this->kill_count[$player_id] = $row['kills'];
-      $this->infestation_count[$player_id] = $row['infestations'];
+      $this->kill_count[$player_username] = $row['kills'];
+      $this->infestation_count[$player_username] = $row['infestations'];
     }
 
 
@@ -87,9 +89,7 @@ class Game {
           "WHERE game = $game_id "
           );
       while ($row = mysql_fetch_array($result)) {
-        $pid = $row['player'];
-        $target = $row['current_target'];
-        $this->cod_players[$pid] = $target;
+        $this->cod_players[$row['player']] = $row['current_target'];
       }
     }
   }
@@ -105,6 +105,7 @@ class Game {
   public function getType() { return $this->gametype; }
   public function started() { return $this->started; }
   public function ended() { return $this->ended; }
+  public function isHidden() { return $this->hidden; }
   public function numTotal() { return $this->numDead()+$this->numAlive(); }
   public function numDead() { return count($this->dead_players); }
   public function numAlive() { return count($this->alive_players); }
@@ -115,26 +116,27 @@ class Game {
   public function setName($v) { $this->name = $v; }
   public function setType($v) { $this->gametype = $v; }
   public function setStarted($v) { $this->started = $v; }
+  public function setHidden($v) { $this->hidden = $v; }
 
-  public function getKillCount($player_id) { return $this->kill_count[$player_id]; }
-  public function getInfestationCount($player_id) { return $this->infestation_count[$player_id]; }
+  public function getKillCount($player_username) { return $this->kill_count[$player_username]; }
+  public function getInfestationCount($player_username) { return $this->infestation_count[$player_username]; }
 
-  public function incKillCount($player_id) {
-    $this->kill_count[$player_id]++;
+  public function incKillCount($player_username) {
+    $this->kill_count[$player_username]++;
     $result = sql(
         "UPDATE a_ingame ".
-        "SET kills = {$this->kill_count[$player_id]} ".
-        "WHERE user_id = $player_id ".
+        "SET kills = {$this->kill_count[$player_username]} ".
+        "WHERE username = '$player_username' ".
         "AND game = {$this->id} "
         );
   }
 
-  public function incInfestationCount($player_id) {
-    $this->infestation_count[$player_id]++;
+  public function incInfestationCount($player_username) {
+    $this->infestation_count[$player_username]++;
     $result = sql(
         "UPDATE a_ingame ".
-        "SET infestations = {$this->infestation_count[$player_id]} ".
-        "WHERE user_id = $player_id ".
+        "SET infestations = {$this->infestation_count[$player_username]} ".
+        "WHERE username = '$player_username' ".
         "AND game = {$this->id} "
         );
   }
@@ -142,7 +144,7 @@ class Game {
   public function getTypeName() {
     switch ($this->gametype) {
       case Game::REGULAR:
-        return "Regular";
+        return "Classic";
       case Game::ZOMBIES:
         return "Zombies";
       case Game::CIRCLED:
@@ -161,9 +163,10 @@ class Game {
           "UPDATE a_games ".
           "SET descr = '".addslashes($this->descr)."', ".
           "    starts = '{$this->start}', ".
-          "    admin = {$this->admin}, ".
+          "    admin = '{$this->admin}', ".
           "    name = '".addslashes($this->name)."', ".
           "    type = '{$this->gametype}', ".
+          "    hidden = {$this->hidden}, ".
           "    started = {$this->started}, ".
           "    ended = ".($this->ended?"'{$this->ended}'":"NULL")." ".
           "WHERE id = {$this->id} "
@@ -171,23 +174,26 @@ class Game {
     } else {
       $result = sql(
           "INSERT INTO a_games ".
-          "(name, type, starts, descr, admin) ".
+          "(name, type, starts, descr, admin, hidden) ".
           "VALUES ( ".
           "'".addslashes($this->name)."', ".
           $this->gametype.", ".
           "'{$this->start}', ".
           "'".addslashes($this->descr)."', ".
-          $this->admin.")"
+          "'{$this->admin}', ".
+          "{$this->hidden})"
           );
+
+      $this->id = mysql_insert_id();
     }
 
     if ($this->gametype == Game::CIRCLED && $this->started) {
       foreach ($this->cod_players as $key => $val) {
         $result2 = sql(
             "UPDATE a_cod ".
-            "SET current_target = $val ".
+            "SET current_target = '$val' ".
             "WHERE game = {$this->id} ".
-            "  AND player = $key "
+            "  AND player = '$key' "
             );
       }
     }
@@ -198,14 +204,14 @@ class Game {
 
   public function getPlayers() {
     $result = sql(
-        "SELECT user_id ".
+        "SELECT username ".
         "FROM a_ingame ".
         "WHERE game=".$this->id
         );
 
     $players = array();
     while ($row = mysql_fetch_array($result)) {
-      $players[] = User::getUser($row['user_id']);
+      $players[] = User::getUser($row['username']);
     }
     return $players;
   }
@@ -236,7 +242,7 @@ class Game {
 
   public function getAssassinPlayers() {
     $result = sql(
-        "SELECT user_id ".
+        "SELECT username ".
         "FROM a_ingame ".
         "WHERE game={$this->id} ".
         "  AND assassin=1 "
@@ -244,14 +250,14 @@ class Game {
 
     $players = array();
     while ($row = mysql_fetch_array($result)) {
-      $players[] = User::getUser($row['user_id']);
+      $players[] = User::getUser($row['username']);
     }
     return $players;
   }
 
   public function getNonAssassinPlayers() {
     $result = sql(
-        "SELECT user_id ".
+        "SELECT username ".
         "FROM a_ingame ".
         "WHERE game={$this->id} ".
         "  AND assassin=0 "
@@ -259,18 +265,18 @@ class Game {
 
     $players = array();
     while ($row = mysql_fetch_array($result)) {
-      $players[] = User::getUser($row['user_id']);
+      $players[] = User::getUser($row['username']);
     }
     return $players;
   }
 
-  public function isDead($user)     { return $this->dead_players[$user->getId()]; }
-  public function deathTime($user)  { return $this->isDead($user); }
-  public function isAlive($user)    { return $this->alive_players[$user->getId()]; }
+  public function isDead($user)     { return isset($this->dead_players[$user->getUsername()]); }
+  public function deathTime($user)  { return $this->dead_players[$user->getUsername()]; }
+  public function isAlive($user)    { return isset($this->alive_players[$user->getUsername()]); }
   public function isPlayer($user)   { return $this->isAlive($user) || $this->isDead($user); }
-  public function isAssassin($user) { return in_array($user->getId(),$this->assassins); }
+  public function isAssassin($user) { return in_array($user->getUsername(),$this->assassins); }
   public function numAssassins()    { return count($this->assassins); }
-  public function isAdmin($user) { return $this->admin == $user->getId(); }
+  public function isAdmin($user) { return $this->admin == $user->getUsername(); }
 
   public function addPlayer($user) {
     if ($this->ended())
@@ -280,24 +286,24 @@ class Game {
     else {
       sql(
           "INSERT INTO a_ingame ".
-          "(user_id, game) ".
-          "VALUES ({$user->getId()}, {$this->getId()}) "
+          "(username, game) ".
+          "VALUES ('{$user->getUsername()}', {$this->getId()}) "
          );
-      $this->alive_players[$user->getId()] = 1;
+      $this->alive_players[$user->getUsername()] = 1;
     }
   }
 
-  private function addDeadPlayer($id,$when) { $this->dead_players[$id] = $when; }
-  private function addAlivePlayer($id)      { $this->alive_players[$id] = 1; }
+  private function addDeadPlayer($username,$when) { $this->dead_players[$username] = $when; }
+  private function addAlivePlayer($username)      { $this->alive_players[$username] = 1; }
 
   public function setAssassin($user) {
     sql(
         "UPDATE a_ingame ".
         "SET assassin=TRUE ".
         "WHERE game={$this->getId()} ".
-        "  AND user_id={$user->getId()} "
+        "  AND username='{$user->getUsername()}' "
        );
-    $this->assassins[] = $user->getId();
+    $this->assassins[] = $user->getUsername();
   }
 
   public function canStart() {
@@ -312,7 +318,7 @@ class Game {
 
   # TODO XXX
   static function getCodStartEmailText($target) {
-    return "A game of Circle of Death has started! Every person has the name of only one other target. It is your goal to track down and kill your target while avoiding your persuer. Your target's name is:\n\n{$target->getUsername()}\n\nYou may find their profile picture here: http://assassins.homelinux.org/assassins/who.php?id={$target->getId()}\n\nIt is recommended that you print out this email and keep it on you at all times as proof of who your target is. Then, should you die, you can give it to your killer so that they may continue hunting others. PLEASE mark yourself as dead on the website AS SOON AS POSSIBLE after you die!\n\nBe safe, watch your back, and trust no one!";
+    return "A game of Circle of Death has started! Every person has the name of only one other target. It is your goal to track down and kill your target while avoiding your persuer. Your target's name is:\n\n{$target->getFullName()}\n\nYou may find their profile picture here: http://assassins.homelinux.org/assassins/who.php?username={$target->getUsername()}\n\nIt is recommended that you print out this email and keep it on you at all times as proof of who your target is. Then, should you die, you can give it to your killer so that they may continue hunting others. PLEASE mark yourself as dead on the website AS SOON AS POSSIBLE after you die!\n\nBe safe, watch your back, and trust no one!";
   }
 
   public function start($num_assassins) {
@@ -386,9 +392,9 @@ class Game {
               "  (game, player, initial_target, current_target) ".
               "VALUES ( ".
               $this->getId().", ".
-              $current_player->getId().", ".
-              $players[$rand]->getId().", ".
-              $players[$rand]->getId().
+              "'{$current_player->getUsername()}', ".
+              "'{$players[$rand]->getUsername()}', ".
+              "'{$players[$rand]->getUsername()}'".
               ")"
              );
 
@@ -414,9 +420,9 @@ class Game {
             "  (game, player, initial_target, current_target) ".
             "VALUES ( ".
             $this->getId().", ".
-            $current_player->getId().", ".
-            $players[0]->getId().", ".
-            $players[0]->getId().
+            "'{$current_player->getUsername()}', ".
+            "'{$players[0]->getUsername()}', ".
+            "'{$players[0]->getUsername()}'".
             ")"
            );
 
@@ -439,39 +445,39 @@ class Game {
     sql(
         "UPDATE a_ingame ".
         "SET died='$time' ".
-        "WHERE user_id=".$user->getId().
+        "WHERE username='{$user->getUsername()}' ".
         "  AND game=".$this->getId()
        );
-    $this->dead_players[$user->getId()] = $time;
-    unset($this->alive_players[$user->getId()]);
+    $this->dead_players[$user->getUsername()] = $time;
+    unset($this->alive_players[$user->getUsername()]);
 
 
     $this->evaluateGameState();
 
     // Handle Circle of Death games
     if ($this->gametype == Game::CIRCLED && !$this->ended) {
-      $id = $user->getId();
+      $username = $user->getUsername();
 
       // Get our current target and set it to nothing
-      $target = $this->cod_players[$id];
-      $this->cod_players[$id] = -1;
+      $target = $this->cod_players[$username];
+      $this->cod_players[$username] = -1;
 
       // Find out who has us and update their target to ours
       foreach ($this->cod_players as $key => $val) {
-        if ($val == $id) {
-          // $val/$id is us (the newly dead)
+        if ($val == $username) {
+          // $val/$username is us (the newly dead)
           // $key is the person who has us
           // $target is our old target
 
           $this->cod_players[$key] = $target;
 
           $killer = User::getUser($key);
-          $me = User::getUser($id)->getUsername();
-          $them = User::getUser($target)->getUsername();
+          $me = User::getUser($username)->getFullName();
+          $them = User::getUser($target)->getFullname();
 
           mailPlayers(array($killer),
               "Your assassins target has died!",
-              "Your previous assassins target, $me, has been neutralized! Your new target is:\n\n$them\n\nYou may find their profile picture here: http://assassins.homelinux.org/assassins/who.php?id=$target"
+              "Your previous assassins target, $me, has been neutralized! Your new target is:\n\n$them\n\nYou may find their profile picture here: http://assassins.homelinux.org/assassins/who.php?username=$target"
               );
           break;
         }
@@ -513,13 +519,13 @@ class Game {
     }
   }
 
-  public static function getStartedGames() {
+  public static function getStartedGames($showhidden = false) {
     $result = sql(
         "SELECT id ".
         "FROM a_games ".
         "WHERE started = 1 ".
         "  AND ended IS NULL ".
-        "  AND id != 33 ".
+        ($showhidden?"":" AND hidden = 0 ").
         "ORDER BY starts DESC "
         );
 
@@ -530,13 +536,13 @@ class Game {
     return $games;
   }
 
-  public static function getPendingGames() {
+  public static function getPendingGames($showhidden = false) {
     $result = sql(
         "SELECT id ".
         "FROM a_games ".
         "WHERE started = 0 ".
         "  AND ended IS NULL ".
-        "  AND id != 33 ".
+        ($showhidden?"":" AND hidden = 0 ").
         "ORDER BY starts DESC "
         );
 
@@ -547,12 +553,13 @@ class Game {
     return $games;
   }
 
-  public static function getFinishedGames() {
+  public static function getFinishedGames($showhidden = false) {
     $result = sql(
         "SELECT id ".
         "FROM a_games ".
         "WHERE started = 1 ".
         "  AND ended IS NOT NULL ".
+        ($showhidden?"":" AND hidden = 0 ").
         "ORDER BY starts DESC "
         );
 

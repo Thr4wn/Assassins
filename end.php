@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 include_once("database.inc");
 include_once("user.inc");

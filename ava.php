@@ -1,12 +1,10 @@
 <?php
-session_start();
-
 include_once("database.inc");
 include_once("util.inc");
 
-requireLogin();
+requireLogin(true);
 
-$ouser = User::getUser($_GET['id']);
+$ouser = User::getUser($_GET['username']);
 if (!$ouser) exit;
 
 $mime = $ouser->getMime();

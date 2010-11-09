@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 include_once("database.inc");
 include_once("user.inc");
@@ -13,18 +12,18 @@ unset($message);
 $showform = false;
 
 $game = Game::getGame($_GET['id']);
-$sending_user = User::getUser($_GET['userid']);
+$sending_user = User::getUser($_GET['username']);
 
 if (!$game)
   setError("Game not found!");
-else if ($user->getId() != $_CONFIG['admin_id'])
+else if (!isAdmin($user))
   setError("You are not the administrator! Shame on you for trying to hack the system!");
 else if (!$sending_user)
   setError("No sending user specified!");
 else if ($_POST['send']) {
-  $subject = $_POST['subject'];
-  $emessage = $_POST['message']."\n\n- {$sending_user->getUsername()}";
-	mailPlayers($game->getPlayers(), $subject, $emessage, true);
+  $subject = "Assassins: ".$_POST['subject'];
+  $emessage = $_POST['message']."\n\n- {$sending_user->getFullName()}";
+  mailPlayers($game->getPlayers(), $subject, $emessage, true);
   $message = "Message sent";
 } else
   $showform = true;
@@ -39,21 +38,36 @@ if (isset($message))
 
 if (!$e) {
   if ($showform) {
-    echo "<h2>Mail Players</h2>";
+?>
+<h2>Mail Players</h2>
 
-    echo "<form name='mail?id={$game->getId()}' method='post'>\n";
-    echo "<input type=hidden value=1 name='send'/>\n";
-    echo "<label for='name'>name:</label>\n";
-    echo "<input type=text name='name' maxlength=30 value='{$sending_user->getUsername()}' /><br/>\n";
-    echo "<label for='subject'>subject:</label>\n";
-    echo "<input type=text name='subject' maxlength=50 value='{$_GET['subject']}' /><br/>\n";
-    echo "<label for='message'>message:</label>\n";
-    echo "<textarea name='message' rows=8 cols=60></textarea><br/>\n";
-    echo "<label for='submit'>&nbsp;</label>\n";
-    echo "<input type=submit value='Send Email'/></form>\n";
-  } else {
-    echo "<p><a href='game.php?id={$game->getId()}'>Back to the game</a></p>";
+<table style='width: 100%'>
+<tr><td style='vertical-align: top'>
+<form name='mail?id=<?=$game->getId()?>' method='post'>
+<input type=hidden value=1 name='send'/>
+<label for='name'>name:&nbsp;</label>
+<input type=text name='dname' id='dname' maxlength=30 value='<?=$sending_user->getFullName()?>' readonly><br>
+<input type=hidden name='name' value='<?=$sending_user->getUsername()?>'>
+<label for='subject'>subject:&nbsp;</label>
+<input type=text name='subject' maxlength=50 value='<?=$_GET['subject']?>'><br>
+<label for='message'>message:&nbsp;</label>
+<textarea name='message' rows=8 cols=60></textarea><br>
+<label for='submit'>&nbsp;</label>
+<input type=submit value='Send Email'></form>
+</td><td style='vertical-align: top; width: auto;'>
+<p>Will be sending email to:</p>
+<ul>
+<?php
+  foreach ($game->getPlayers() as $player) {
+    echo "<li>{$player->getEmail()} ({$player->getUsername()})</li>\n";
   }
+?>
+</ul>
+</td></tr>
+</table>
+<?php
+  }
+  echo "<p><a href='game.php?id={$game->getId()}'>Back to the game</a></p>";
 }
 
 include("bottom.php");

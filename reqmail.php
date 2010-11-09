@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 include_once("database.inc");
 include_once("user.inc");
@@ -14,18 +13,18 @@ $showform = false;
 
 $game = Game::getGame($_GET['id']);
 if (!$game)
-	setError("Game not found!");
+  setError("Game not found!");
 else if (!$game->isAdmin($user))
   setError("You are not the admin of that game!");
 else if ($_POST['send']) {
   // logic here
-  mail(User::getUser($_CONFIG['admin_id'])->getEmail(),
+  mail($_CONFIG['email'],
       "Mass Email Request",
-      "User: {$user->getUsername()}\n".
+      "User: {$user->getFullName()}\n".
       "Subject: {$_POST['subject']}\n".
       "Message:\n{$_POST['message']}\n\n".
-      "http://assassins.homelinux.org/assassins/mail.php?id={$game->getId()}&userid={$user->getId()}&subject=".urlencode($_POST['subject']),
-      "From: taylor.assassins@gmail.com");
+      "http://{$_CONFIG['hostname']}/mail.php?id={$game->getId()}&username={$user->getUsername()}&subject=".urlencode($_POST['subject']),
+      $_CONFIG['addheaders']);
   $message = "Request for email sent.";
 } else
   $showform = true;
@@ -40,15 +39,20 @@ if (isset($message))
 
 if (!$e) {
   if ($showform) {
-    echo "<br/><br/>Using this form, you may send an approval request to the system administrator for an email to be sent to all players in this game on your behalf. If approved, your username will show up in the email.<br/><br/>\n";
-    echo "<form name='req_mail?id={$game->getId()}' method='post'>\n";
-    echo "<input type=hidden value=1 name='send'/>\n";
-    echo "<label for='subject'>subject:</label>\n";
-    echo "<input type=text name='subject' maxlength=50/><br/>\n";
-    echo "<label for='message'>message:</label>\n";
-    echo "<textarea name='message' rows=8 cols=60></textarea><br/>\n";
-    echo "<label for='submit'>&nbsp;</label>\n";
-    echo "<input type=submit value='Request Approval'/></form>\n";
+?>
+<p>Using this form, you may send an approval request to the system administrator for an email to be sent to all players in this game on your behalf. If approved, your username will show up in the email.</p>
+<form action='reqmail.php?id=<?=$game->getId()?>' method='post'>
+  <div>
+  <input type=hidden value=1 name='send'>
+  <label for='subject'>subject:</label>
+  <input type=text name='subject' id='subject' maxlength=50><br>
+  <label for='message'>message:</label>
+  <textarea name='message' id='message' rows=8 cols=60></textarea><br>
+  <label for='submit'>&nbsp;</label>
+  <input type='submit' name='submet' id='submit' value='Request Approval'>
+  </div>
+</form>
+<?php
   } else {
     echo "<p><a href='game.php?id={$game->getId()}'>Back to the game</a></p>";
   }

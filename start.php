@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 include_once("database.inc");
 include_once("user.inc");
@@ -15,7 +14,7 @@ $showform = false;
 $game = Game::getGame($_GET['id']);
 if (!$game)
   setError("Game not found!");
-else if (!$game->isAdmin($user) && $user->getId() != $_CONFIG['admin_id'])
+else if (!$game->isAdmin($user) && !isAdmin($user))
   setError("You are not the admin of that game!");
 else if ($game->started())
   setError("This game has already been started!");
@@ -43,7 +42,7 @@ if (!$e) {
           print "<p>There are {$game->numTotal()} players in the game. How many assassins do you want to set?</p>\n";
           print "<form name='start_game?id={$game->getId()}' method='post'>\n";
           print "<select name='num'>\n";
-          for ($i = 1; $i <= $game->numTotal()-1; $i++)
+          for ($i = 1; $i < $game->numTotal()-1; $i++)
             print "\t<option value='$i'>$i</option>\n";
           print "</select><br/><input type=submit value='Start Game'/></form>";
           break;

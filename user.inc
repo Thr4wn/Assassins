@@ -1,176 +1,135 @@
 <?php
-	include_once("database.inc");
+  include_once("database.inc");
 
-	class User {
-		private $id;
-		private $username;
-		private $md5password;
-		private $ban;
-		private $email;
-		private $joined;
-		private $limbo;
-		private $ava;
-		private $mime;
+  class User {
+    private $username;
+    private $first;
+    private $last;
+    private $ban;
+    private $email;
+    private $ava;
+    private $mime;
+    private $verify;
+    private $changeemail;
 
-		public function User($user_id) {
-			$this->populate($user_id);
-		}
+    public function User($username) {
+      $this->populate($username);
+    }
 
-		private function Populate($user_id) {
-			if ($user_id == null) return;
+    private function Populate($username) {
+      if ($username == null) return;
 
-			$result = sql(
-				"SELECT * ".
-				"FROM a_users ".
-				"WHERE id = $user_id "
-				);
-			if (bad($result))
-				return;
+      $this->username = $username;
 
-			$row = mysql_fetch_array($result);
+      $result = sql(
+        "SELECT * ".
+        "FROM a_tusers ".
+        "WHERE username = '$username' "
+        );
+      if (!bad($result)) {
+        $row = mysql_fetch_array($result);
 
-			$this->id = $row['id'];
-			$this->username = $row['name'];
-			$this->md5password = $row['password'];
-			$this->ban = $row['ban'];
-			$this->email = $row['email'];
-			$this->joined = $row['joined'];
-			$this->limbo = $row['limbo'];
-			$this->ava = $row['ava'];
-			$this->mime = $row['mime'];
-		}
+        $this->first = $row['first'];
+        $this->last = $row['last'];
+        $this->ban = $row['banned'];
+        $this->email = $row['email'];
+        $this->ava = $row['ava'];
+        $this->mime = $row['mime'];
+        $this->verify = $row['verify'];
+        $this->changeemail = $row['changeemail'];
+      }
 
-		/*******************************************************
-		***  ACCESSOR METHODS
-		*******************************************************/
-		public function getId() { return $this->id; }
-		public function getUsername() { return stripslashes($this->username); }
-		public function getPassword() { return $this->md5password; }
-		public function getEmail() { return stripslashes($this->email); }
-		public function getJoined() { return $this->joined; }
-		public function getLimbo() { return $this->limbo; }
-		public function getAva() { return $this->ava; }
-		public function getMime() { return $this->mime; }
-		public function isBanned() { return $this->ban; }
+      $save = false;
+      if (!$this->email) {
+        $this->email = "{$this->username}@taylor.edu";
+        $save = true;
+      }
 
-		public function setUsername($v) { $this->username = $v; }
-		public function setmd5Password($v) { $this->md5password = $v; }
-		public function setBan($v) { $this->ban = $v; }
-		public function setEmail($v) { $this->email = $v; }
-		public function setJoined($v) { $this->joined = $v; }
-		public function setLimbo($v) { $this->limbo = $v; }
-		public function setAva($v) { $this->ava = $v; }
-		public function setMime($v) { $this->mime = $v; }
+      if (!$this->first || !$this->last) {
+        $matches = array();
+        if (preg_match("/^(\w+)_([a-zA-Z]+)\d*$/", $this->username, $matches)) {
+          $this->first = ucwords($matches[1]);
+          $this->last = ucwords($matches[2]);
+        } else if (preg_match("/^..([a-zA-Z]+)\d*$/", $this->username, $matches)) {
+          $this->first = 'none';
+          $this->last = ucwords($matches[1]);
+        }
+        $save = true;
+      }
 
-		public function save() {
-			if ($this->id) {
-				$result = sql(
-					"UPDATE a_users ".
-					"SET name = '".addslashes($this->username)."', ".
-					"    password = '{$this->md5password}', ".
-					"    ban = {$this->ban}, ".
-					"    email = '".addslashes(strtolower($this->email))."', ".
-					"    joined = '{$this->joined}', ".
-					"    limbo = {$this->limbo} ".
-					"WHERE id = {$this->id} "
-					);
+      if ($save)
+        $this->save();
 
-				return $result;
-			} else {
-				if (!vemail($this->email)) {
-					setError("Invalid email address!");
-					return null;
-				}
+    }
 
-				$user = User::getUserByEmail($this->email);
-				if ($user) {
-					setError("Duplicate email!");
-					return null;
-				}
+    /*******************************************************
+    ***  ACCESSOR METHODS
+    *******************************************************/
+    public function getUsername() { return $this->username; }
+    public function getFullName() { return "{$this->first} {$this->last}"; }
+    public function getFirst() { return stripslashes($this->first); }
+    public function getLast() { return $this->last; }
+    public function getEmail() { return $this->email; }
+    public function getAva() { return $this->ava; }
+    public function getMime() { return $this->mime; }
+    public function isBanned() { return $this->ban; }
+    public function getVerify() { return $this->verify; }
+    public function getChangeEmail() { return $this->changeemail; }
 
-				$result = sql(
-					"INSERT INTO a_users ".
-					"    (name, password, email, joined) ".
-					"VALUES (".
-						"'".addslashes($this->username)."',".
-						"'{$this->md5password}',".
-						"'".addslashes($this->email)."',".
-						"'{$this->joined}'".
-						") "
-					);
+    public function setFirst($v) { $this->first = $v; }
+    public function setLast($v) { $this->last = $v; }
+    public function setEmail($v) { $this->email = $v; }
+    public function setAva($v) { $this->ava = $v; }
+    public function setMime($v) { $this->mime = $v; }
+    public function setBan($v) { $this->ban = $v; }
+    public function setVerify($v) { $this->verify = $v; }
+    public function setChangeEmail($v) { $this->changeemail = $v; }
 
-				return $result;
-			}
-		}
+    public function save() {
+      $result = sql(
+        "UPDATE a_tusers ".
+        "SET banned = {$this->ban}, ".
+        "    email = '{$this->email}', ".
+        "    first = '".addslashes($this->first)."', ".
+        "    last = '{$this->last}', ".
+        "    verify = '{$this->verify}', ".
+        "    changeemail = '{$this->changeemail}' ".
+        "WHERE username = '{$this->username}' "
+        , true);
 
-		public function saveAvatar() {
-			$result = mysql_query(
-				"UPDATE a_users ".
-				"SET ava = \"".addslashes($this->ava)."\", ".
-				"    mime = \"{$this->mime}\" ".
-				"WHERE id = {$this->id} "
-				);
-			return $result;
-		}
+      if (!$result) {
+        $result = sql(
+          "INSERT INTO a_tusers ".
+          "    (username, email, first, last) ".
+          "VALUES (".
+            "'{$this->username}', ".
+            "'{$this->email}', ".
+            "'".addslashes($this->first)."', ".
+            "'{$this->last}' ".
+            ") "
+          );
+      }
 
-		public function confirmAccount() {
-			$this->setLimbo(0);
-			return $result;
-		}
+      return $result;
+    }
 
-		public function isLoggedIn() {
-			return $this->id == $_SESSION['userid'];
-		}
+    public function saveAvatar() {
+      $result = mysql_query(
+        "UPDATE a_tusers ".
+        "SET ava = \"".addslashes($this->ava)."\", ".
+        "    mime = \"{$this->mime}\" ".
+        "WHERE username = '{$this->username}' "
+        );
+      return $result;
+    }
 
-		public static function getUser($user_id) {
-			$user = new User($user_id);
-			if ($user->getId() == null) return null;
-			return $user;
-		}
+    public function isLoggedIn() {
+      return $this->username == requireLogin(true, true)->getUsername();
+    }
 
-		public static function getUserByName($name) {
-			$name = addslashes($name);
-			$result = sql(
-				"SELECT id ".
-				"FROM a_users ".
-				"WHERE username = '$name' "
-				);
-
-			if (bad($result))
-				return null;
-
-			$row = mysql_fetch_array($result);
-			return User::getUser($row['id']);
-		}
-
-		public static function getUserByEmail($email) {
-			$email = addslashes(strtolower($email));
-			$result = sql(
-				"SELECT id ".
-				"FROM a_users ".
-				"WHERE email = '$email' "
-				);
-
-			if (bad($result))
-				return null;
-
-			$row = mysql_fetch_array($result);
-			return User::getUser($row['id']);
-		}
-
-		public static function getUserByPassword($pass) {
-			$pass = md5($pass);
-			$result = sql(
-				"SELECT id ".
-				"FROM a_users ".
-				"WHERE password = '$pass' "
-				);
-
-			if (bad($result))
-				return null;
-
-			$row = mysql_fetch_array($result);
-			return User::getUser($row['id']);
-		}
-	}
+    public static function getUser($username) {
+      $user = new User($username);
+      return $user;
+    }
+  }
 ?>

@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 include_once("util.inc");
 include_once("game.inc");
@@ -26,9 +25,9 @@ if (!displayErrors()) {
       echo "<p><b>No!</b> You are <b>not</b> one of the assassins.</p>";
 
   } else if ($game->getType() == Game::CIRCLED) {
-    $target_id = $game->cod_players[$user->getId()];
+    $target_id = $game->cod_players[$user->getUsername()];
     $target = User::getUser($target_id);
-    echo "<p>Your target is <b><a href='who.php?id={$target->getId()}'>{$target->getUsername()}</a></b></p>\n";
+    echo "<p>Your target is <b><a href='who.php?username={$target->getUsername()}'>{$target->getFullName()}</a></b></p>\n";
   }
 
 	displayErrors();
