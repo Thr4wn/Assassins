@@ -5,8 +5,8 @@
 <title>Assassins<? if(isset($title)) echo ": ".$title; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="style.css" type="text/css">
-<?php if isset($headers) echo $headers;?>
-<?php if isset($recaptchaopts) echo $recaptchaopts;?>
+<?php if (isset($headers)) echo $headers;?>
+<?php if (isset($recaptchaopts)) echo $recaptchaopts;?>
 </head>
 <body>
 
