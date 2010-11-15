@@ -1,5 +1,6 @@
 - add option for subscribing to email list
 - add timeout for zombie games
+- fix User->isLoggedIn() to utilize phpCAS
 - finish implementing CoD
 - detect image type from actual file and not the extension
 - move stuff like strtolower and addslashes into user.inc

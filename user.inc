@@ -9,6 +9,7 @@
     private $email;
     private $ava;
     private $mime;
+    private $mlist_enrolled;
     private $verify;
     private $changeemail;
 
@@ -35,6 +36,7 @@
         $this->email = $row['email'];
         $this->ava = $row['ava'];
         $this->mime = $row['mime'];
+        $this->mlist_enrolled = $row['maillist_enroll'];
         $this->verify = $row['verify'];
         $this->changeemail = $row['changeemail'];
       }
@@ -72,6 +74,7 @@
     public function getEmail() { return $this->email; }
     public function getAva() { return $this->ava; }
     public function getMime() { return $this->mime; }
+    public function isEnrolledInMailingList() { return $this->mlist_enrolled; }
     public function isBanned() { return $this->ban; }
     public function getVerify() { return $this->verify; }
     public function getChangeEmail() { return $this->changeemail; }
@@ -81,6 +84,7 @@
     public function setEmail($v) { $this->email = $v; }
     public function setAva($v) { $this->ava = $v; }
     public function setMime($v) { $this->mime = $v; }
+    public function setMailingListEnrollment($v) { $this->mlist_enrolled = $v; }
     public function setBan($v) { $this->ban = $v; }
     public function setVerify($v) { $this->verify = $v; }
     public function setChangeEmail($v) { $this->changeemail = $v; }
@@ -92,6 +96,7 @@
         "    email = '{$this->email}', ".
         "    first = '".addslashes($this->first)."', ".
         "    last = '{$this->last}', ".
+        "    maillist_enroll = '{$this->mlist_enrolled}', ".
         "    verify = '{$this->verify}', ".
         "    changeemail = '{$this->changeemail}' ".
         "WHERE username = '{$this->username}' "
