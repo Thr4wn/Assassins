@@ -60,6 +60,7 @@ $e = displayErrors();
 
 if (isset($message))
   echo "<div class='message'>$message</div>";
+else {
 
   // normal layout for the page
 ?>
@@ -93,6 +94,7 @@ if (isset($message))
   </div>
 </form>
 <?php
+}
 
 include("bottom.php");
 ?>

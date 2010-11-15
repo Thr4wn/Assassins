@@ -15,7 +15,7 @@ if (isset($poll)) {
 
   echo "<h2>{$title}</h2>\n";
 
-  if (!$poll->hasVoted($user->getUsername()) && $poll->isActive() && !isAdmin($user))
+  if (!$poll->hasVoted($user->getUsername()) && $poll->isActive())
     setError("You cannot see results of the current poll until you have voted!");
   else {
 
@@ -55,7 +55,9 @@ if (isset($poll)) {
   echo "<table style='width:100%; margin: 1em;'>";
 
   foreach ($polls as $poll) {
-    echo "<tr><td><a href='polls.php?id={$poll->getId()}'>{$poll->getText()}</a></td></tr>\n";
+    if (!$poll->isHidden()) {
+      echo "<tr><td><a href='polls.php?id={$poll->getId()}'>{$poll->getText()}</a></td></tr>\n";
+    }
   }
 
   echo "</table>";

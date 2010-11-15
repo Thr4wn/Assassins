@@ -135,12 +135,12 @@ a.sub:hover {
 }
 
 #poll-box {
-  padding: 1em;
-  width: 350px;
+  padding: 0.5em;
+  width: 340px;
 }
 
 #progress-bar {
-  width: 320px; /* Should be less than width of #poll-box */
+  width: 330px; /* Should be less than width of #poll-box */
   height: 15px;
   margin: 0px;
   background-color: #AAA;

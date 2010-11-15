@@ -75,7 +75,7 @@ include("top.php");
 </ul>
 
 <h3 id="deaths">Deaths</h3>
-<p>You must mark yourself as dead within 6 hours of being killed. There is no way currently to enforce that rule at all and there won't actually be any punishment, but seriously, just do it within 6 hours.</p>
+<p>You must mark yourself as dead within 6 hours of being killed. There is no way currently to enforce that rule at all and there won't actually be any punishment, but seriously, just do it ASAP.</p>
 
 <h3 id="divulging">Divulging of Information</h3>
 <ul>
@@ -87,7 +87,7 @@ include("top.php");
   </li>
   <li style='margin-top: 1em;'>If you are currently <span class='b'>DEAD</span>, you may divulge <span class='u'>ONLY</span>:
     <ul>
-      <li>The fact that you were gruesomely killed</li>
+      <li>The fact that you were gruesomely killed (not how)</li>
       <li>The time of your gruesome death</li>
     </ul>
   </li>
@@ -123,7 +123,7 @@ include("top.php");
 <p>You may not attack or use non-players (civilians) as shields -- <span class='b'>even if they <i>want</i> to help you</span>. What did they ever do to you?? This includes dancing around a civilian while avoiding an enemy. You may, however, hire a civilian to serve as a distraction or lookout, but only with their prior consent.</p>
 
 <h3 id="murder_rule">Murder Rule</h3>
-<p>Don't literally kill someone. Please. I claim no responsibility for your villainous actions.</p>
+<p>Don't literally kill someone. Please. I claim no responsibility for your villainous actions. (Also, do not injure anyone. Please play responsibly.)</p>
 
 <br>
 
