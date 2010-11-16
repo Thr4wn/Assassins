@@ -118,7 +118,7 @@ EOS;
   }
 
   function stopImpersonating() {
-    setcookie('impersonate', 'none', time() - 60);
+    setcookie('impersonate', 'none', time() - 60*60*24*265);
   }
 
   function isAdmin($user) {
