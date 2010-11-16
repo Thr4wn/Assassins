@@ -100,7 +100,7 @@
         "    verify = '{$this->verify}', ".
         "    changeemail = '{$this->changeemail}' ".
         "WHERE username = '{$this->username}' "
-        , true);
+        );
 
       if (!$result) {
         $result = sql(

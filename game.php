@@ -34,8 +34,13 @@ if ($game) {
 
   }
 
-  if (isAdmin($user))
-    echo "&middot; <a href=\"mail.php?id=$id&amp;username={$user->getUsername()}\">mail</a> all players<br>";
+  if (isAdmin($user)) {
+    echo "<br>";
+    echo "&middot; <a href=\"mail.php?id=$id&amp;type=mailall&amp;username={$user->getUsername()}\">mail</a> all players<br>";
+
+    if (!$game->mailHasBeenSent() && !$game->started())
+      echo "&middot; <a href=\"mail.php?id=$id&amp;type=maillist\">notify</a> mailing list of new game<br>";
+  }
 
   if ($game->started() && !$game->ended() && $game->isPlayer($user)) {
     if ($game->getType() == Game::REGULAR)

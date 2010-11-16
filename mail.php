@@ -13,20 +13,49 @@ $showform = false;
 
 $game = Game::getGame($_GET['id']);
 $sending_user = User::getUser($_GET['username']);
+$type = $_GET['type'];
 
 if (!$game)
   setError("Game not found!");
 else if (!isAdmin($user))
   setError("You are not the administrator! Shame on you for trying to hack the system!");
-else if (!$sending_user)
-  setError("No sending user specified!");
-else if ($_POST['send']) {
-  $subject = "Assassins: ".$_POST['subject'];
-  $emessage = $_POST['message']."\n\n- {$sending_user->getFullName()}";
-  mailPlayers($game->getPlayers(), $subject, $emessage, true);
-  $message = "Message sent";
-} else
-  $showform = true;
+else {
+  if ($type == "mailall") {
+
+    if (!$sending_user)
+      setError("No sending user specified!");
+    else if ($_POST['send']) {
+      $subject = "Assassins: ".$_POST['subject'];
+      $emessage = $_POST['message']."\n\n- {$sending_user->getFullName()}";
+      mailPlayers($game->getPlayers(), $subject, $emessage, true);
+      $message = "Message sent";
+    } else
+      $showform = true;
+
+  } else if ($type == "maillist") {
+
+    if ($game->mailHasBeenSent())
+      setError("Mailing list has already been notified of this game!");
+    else {
+      $mailto = array();
+      $result = sql("SELECT username FROM a_tusers WHERE maillist_enroll = 1");
+      while ($row = mysql_fetch_array($result)) {
+        $mailto[] = User::getUser($row['username']);
+      }
+
+      mailPlayers(
+        $mailto,
+        "New Assassins game is starting!",
+        "A new game of \"{$game->getTypeName()}\" assassins is starting on {$game->getStart()}!\n\nSign up today at http://{$_CONFIG['hostname']}/game.php?id={$game->getId()}\n\n- Your friendly neighborhood Assassins administrator",
+        true
+      );
+
+      $game->setMailSent(1);
+      $game->save();
+    }
+
+  }
+}
 
 $title = "Mail Players";
 include("top.php");

@@ -16,10 +16,16 @@ if ($user) {
   }
 
   // to update the avatar
-  else if (isset($_POST['cava'])) {
+  if (isset($_POST['cava'])) {
     $message = handle_Avatar(
       $user,
       $_FILES['avatar']);
+  }
+
+  if (isset($_POST['enroll_submit'])) {
+    $user->setMailingListEnrollment($_POST['enroll']=="on"?1:0);
+    $user->save();
+    $message = "Subscription Enrollment Updated";
   }
 
   if ($user->getFirst() == 'none')
@@ -30,6 +36,22 @@ if ($user) {
   setError("Unable to find you in the database!");
 
 $title = "edit profile";
+$headers = '
+<script type="text/javascript" language="JavaScript">
+  function explainMailingList() {
+     var height = 300;
+     var width = 300;
+     var left = (screen.width/3)-(width/2);
+     var top = (screen.height/3)-(height/2);
+     mywindow = window.open("about:blank", "mailing list","location=1,status=1,scrollbars=0,top=" + top + ",left=" + left + ",width=" + width + ",height=" + height);
+
+     if (mywindow != null) {
+       mywindow.document.write("<h3>What is this \"mailing list\" about?</h3>If you check this box, you will receive email notifications when new games have been started and are waiting for you to join. We will not use this mailing list for spamming you or anything else like that. If you simply want to be notified when new games are started, then this is your option.");
+       mywindow.document.close();
+     }
+  }
+</script>
+';
 include("top.php");
 
 $e = displayErrors();
@@ -68,6 +90,18 @@ if(isset($message))
   <label for="update">&nbsp;</label>
   <input type="submit" name="update" id="update" value="update">
   <?php } ?>
+  </div>
+</form>
+
+<h3>mailing list <a href="javascript:explainMailingList()" class="sub">?</a></h3>
+<form method="POST" action="profile.php">
+  <div>
+  <label for="enroll">subscribe:</label>
+  <input name="enroll" id="enroll" type="checkbox" <?=$user->isEnrolledInMailingList()?"checked":""?>>
+  <br>
+
+  <label for="enroll_submit">&nbsp;</label>
+  <input type="submit" name="enroll_submit" id="enroll_submit" value="update subscription">
   </div>
 </form>
 

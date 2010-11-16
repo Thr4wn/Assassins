@@ -12,6 +12,7 @@ class Game {
   private $started;
   private $ended;
   private $hidden;
+  private $mail_sent;
   private $num_tot;
   private $num_dead;
   private $num_alive;
@@ -52,6 +53,7 @@ class Game {
     $this->started = $row['started'];
     $this->ended = $row['ended'];
     $this->hidden = $row['hidden'];
+    $this->mail_sent = $row['mail_sent'];
 
     $this->dead_players = array();
     $this->alive_players = array();
@@ -106,6 +108,7 @@ class Game {
   public function started() { return $this->started; }
   public function ended() { return $this->ended; }
   public function isHidden() { return $this->hidden; }
+  public function mailHasBeenSent() { return $this->mail_sent; }
   public function numTotal() { return $this->numDead()+$this->numAlive(); }
   public function numDead() { return count($this->dead_players); }
   public function numAlive() { return count($this->alive_players); }
@@ -117,6 +120,7 @@ class Game {
   public function setType($v) { $this->gametype = $v; }
   public function setStarted($v) { $this->started = $v; }
   public function setHidden($v) { $this->hidden = $v; }
+  public function setMailSent($v) { $this->mail_sent = $v; }
 
   public function getKillCount($player_username) { return $this->kill_count[$player_username]; }
   public function getInfestationCount($player_username) { return $this->infestation_count[$player_username]; }
@@ -167,6 +171,7 @@ class Game {
           "    name = '".addslashes($this->name)."', ".
           "    type = '{$this->gametype}', ".
           "    hidden = {$this->hidden}, ".
+          "    mail_sent = {$this->mail_sent}, ".
           "    started = {$this->started}, ".
           "    ended = ".($this->ended?"'{$this->ended}'":"NULL")." ".
           "WHERE id = {$this->id} "
