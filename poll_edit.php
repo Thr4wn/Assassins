@@ -11,7 +11,17 @@ if (!isAdmin($user))
 else if (!$poll)
   setError("Poll not found");
 
-else if ($poll->getNumVotes() > 0)
+else if (isset($_GET['setactive'])) {
+  $poll->setActive($_GET['setactive']);
+  $poll->save();
+  echo "<meta http-equiv='refresh' content='0;poll_manage.php'>";
+
+} else if (isset($_GET['hide'])) {
+  $poll->setHidden($_GET['hide']);
+  $poll->save();
+  echo "<meta http-equiv='refresh' content='0;poll_manage.php'>";
+
+} else if ($poll->getNumVotes() > 0)
   setError("You cannot edit a poll that already has votes!");
 
 else if (isset($_POST['edit'])) {
@@ -63,17 +73,7 @@ if (!$e) {
   if (isset($message))
     echo "<div class='message'>$message</div>";
 
-  $poll = Poll::getPoll($_GET['id']);
-
-  if (isset($_GET['setactive'])) {
-    $poll->setActive($_GET['setactive']);
-    $poll->save();
-    echo "<meta http-equiv='refresh' content='0;poll_manage.php'>";
-  } else if (isset($_GET['hide'])) {
-    $poll->setHidden($_GET['hide']);
-    $poll->save();
-    echo "<meta http-equiv='refresh' content='0;poll_manage.php'>";
-  } else {
+  else {
     // Display edit info
     echo "<h2>$title</h2>";
 ?>
