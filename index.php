@@ -10,11 +10,12 @@ include("top.php");
 Playing assassins is as simple as logging in with your Taylor username and password.
 </p>
 <p>
-<a href="main.php">Click here to login to assassins using myTaylor</a>
+<a href="main.php">Click here to login to assassins using myTAYLOR</a>
 </p>
 
+<br>
 <p>
-<i>Note: If you are having trouble logging in, delete your cookies for taylor.edu and try again. I am working on a fix to this problem.</i>
+<i>Note: If you are having trouble logging in, delete your cookies for taylor.edu and try again. THIS SHOULD BE FIXED NOW.</i>
 </p>
 
 

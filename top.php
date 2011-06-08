@@ -25,6 +25,8 @@ if (isset($user))
 
   if (isAdmin($user))
     echo "<a href='poll_manage.php'>polls</a> &middot; ";
+  else
+    echo "<a href='polls.php'>polls</a> &middot; ";
   ?>
 
   <a href='profile.php'>edit profile</a>

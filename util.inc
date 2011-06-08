@@ -4,7 +4,7 @@
   include_once("poll.inc");
   include_once("user.inc");
   include_once("config.php");
-  include_once("CAS-1.1.3/CAS.php");
+  include_once("CAS-1.2.1RC1/CAS.php");
 
   function pluralize($word,$count) {
     return ($count==1)?$word:$word."s";
@@ -17,36 +17,46 @@
 
 # To avoid an endless loop with Taylor's USIDESC cookie being set while asking the user for reauthentication, here we call clearcookies.jsp to clear Taylor's cookies if the user tries to log in with our form. (After clearing the cookies, we send them to main.php, which will log them into CAS by redirecting them to myTAYLOR.) Surprisingly, this does not reset the CAS session, so SSO still works if they reach the login page while still logged in. Still, this workaround only works if they visit login.php. If they get caught elsewhere on the site (as in, their session timed out and they got redirected to the myTAYLOR login page, clearcookies.jsp will never be called, so they will still be stuck in a loop until they visit this page. This might be solved by checking if the user is authenticated before forcing authentication, and redirecting them to login.php if they are not authenticated.)
 
-    if (!$noreauthenticate && !phpCAS::isAuthenticated()) {
-      if (!$_GET['cas']) {
-        $page = $_SERVER['REQUEST_URI'];
-        $page .= (strpos($page, '?')!==false?'&':'?').'cas=1';
-        $domain = $_CONFIG['hostname'];
-        header("p3p", "CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
-        echo <<<EOS
-<html>
-<head>
-<script type="text/javascript" language="JavaScript">
- function openWindow() {
-     var height = 1;
-     var width = 1;
-     var left = (screen.width/2)-(width/2);
-     var top = (screen.height/2)-(height/2);
-     mywindow = window.open("https://my.taylor.edu/content/jsp/clearcookies.jsp", "login","location=1,status=1,scrollbars=1,top=" + top + ",left=" + left + ",width=" + width + ",height=" + height);
+# UPDATE: A redirect parameter was added to clearcookies.jsp, so one can clear the user's session cookies and then redirect back to assassins.
+# So the string of requests goes: [somewhere_assassins] -> Is Not Authenticated -> 'cas' Not Present -> clearcookies.jsp -> [somewhere_assassins] -> Is Not Authenticated -> my.taylor.edu -> [somewhere_assassins]
+# This would probably work better if we changed the CAS client to redirect first to clearcookies and then use that to redirect to the login page. However, this would involve messing with the way CAS calls the server, so it's probably not the best idea.
 
-     if(mywindow != null) {
-       mywindow.close();
-       window.location = '$page';
-     }
- }
-</script>
-</head>
-<body onLoad="openWindow()">
-<p>You are being redirected to myTAYLOR to login to the Assassins website.</p>
-<p>If you are not automatically redirected, please allow popups for this site and <a href="#" onclick="openWindow(); return false;">click here</a>.</p>
-</body>
-</html>
-EOS;
+    if (!$noreauthenticate && !phpCAS::isAuthenticated()) {
+
+      // We don't force CAS authentication unless we see the cas parameter. This is because we need to clear the user's Portal session cookies first.
+      if (!$_GET['cas']) {
+        $page = "http://".$_CONFIG['hostname'].$_SERVER['REQUEST_URI'];
+        $page .= (strpos($page, '?')!==false?'&':'?').'cas=1';
+        $page = urlencode($page);
+
+        header("Location: http://my.taylor.edu/content/jsp/clearcookies.jsp?redirect=$page");
+
+#        $domain = $_CONFIG['hostname'];
+#        header("p3p", "CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
+#        echo <<<EOS
+#<html>
+#<head>
+#<script type="text/javascript" language="JavaScript">
+# function openWindow() {
+#     var height = 1;
+#     var width = 1;
+#     var left = (screen.width/2)-(width/2);
+#     var top = (screen.height/2)-(height/2);
+#     mywindow = window.open("https://my.taylor.edu/content/jsp/clearcookies.jsp", "login","location=1,status=1,scrollbars=1#,top=" + top + ",left=" + left + ",width=" + width + ",height=" + height);
+#
+#     if(mywindow != null) {
+#       mywindow.close();
+#       window.location = '$page';
+#     }
+# }
+#</script>
+#</head>
+#<body onLoad="openWindow()">
+#<p>You are being redirected to myTAYLOR to login to the Assassins website.</p>
+#<p>If you are not automatically redirected, please allow popups for this site and <a href="#" onclick="openWindow(); return# false;">click here</a>.</p>
+#</body>
+#</html>
+#EOS;
         exit;
       } else {
 
@@ -104,8 +114,14 @@ EOS;
     // (Before the Portal upgrade, it was being unset from the login page. But this is no longer the case.)
     // So, there are two things that need to be destroyed. First, our local session must be obliterated.
     // Second, the usidesc cookie must also be nuked. This can be achieved by calling the Portal logout page.
+
+    // UPDATE: Instead of calling the Portal logout page, we now call clearcookies.jsp and redirect back here.
     session_destroy();
-    header('Location: http://my.taylor.edu/up/Logout?uP_tparam=frm&frm=');
+
+    header('Location: http://my.taylor.edu/content/jsp/clearcookies.jsp?redirect='.urlencode("http://".$_CONFIG['hostname']));
+
+    exit;
+    #header('Location: http://my.taylor.edu/up/Logout?uP_tparam=frm&frm=');
 
     // no SSL validation for the CAS server
     //phpCAS::setNoCasServerValidation();
@@ -207,8 +223,8 @@ EOS;
           break;
       }
 
-    else if (!preg_match("/(\.jpg$)|(\.png$)|(\.gif$)/i", $ori_file))
-      $error = "The file \"$ori_file\" is not a JPG, PNG, or GIF image.";
+    else if (!preg_match("/(\.jpe?g$)|(\.png$)|(\.gif$)/i", $ori_file))
+      setError("The file \"$ori_file\" is not a JPG, PNG, or GIF image.");
     else {
       // Reformat image to correct size
       $newsize = 200;
@@ -226,7 +242,7 @@ EOS;
       $newimage = ImageCreateTrueColor($newwidth, $newheight);
 
       // get the image from the file
-      if (preg_match("/\.jpg$/i",$ori_file))
+      if (preg_match("/\.jpe?g$/i",$ori_file))
         $source = imagecreatefromjpeg($tmp_file);
       else if (preg_match("/\.png$/i",$ori_file))
         $source = imagecreatefrompng($tmp_file);

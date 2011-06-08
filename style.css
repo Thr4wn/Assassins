@@ -113,7 +113,8 @@ ul ol {
 }
 
 td.rulesbox {
-  width: 500px;
+  width: 400px;
+  vertical-align: top;
 }
 
 fieldset {

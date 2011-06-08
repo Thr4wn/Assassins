@@ -23,7 +23,7 @@ else if ($_POST['send']) {
       "User: {$user->getFullName()}\n".
       "Subject: {$_POST['subject']}\n".
       "Message:\n{$_POST['message']}\n\n".
-      "http://{$_CONFIG['hostname']}/mail.php?id={$game->getId()}&username={$user->getUsername()}&subject=".urlencode($_POST['subject']),
+      "http://{$_CONFIG['hostname']}/mail.php?id={$game->getId()}&username={$user->getUsername()}&type=mailall&subject=".urlencode($_POST['subject']),
       $_CONFIG['addheaders']);
   $message = "Request for email sent.";
 } else

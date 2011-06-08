@@ -482,7 +482,7 @@ class Game {
 
           mailPlayers(array($killer),
               "Your assassins target has died!",
-              "Your previous assassins target, $me, has been neutralized! Your new target is:\n\n$them\n\nYou may find their profile picture here: http://assassins.homelinux.org/assassins/who.php?username=$target"
+              "Your previous assassins target, $me, has been neutralized! Your new target is:\n\n$them\n\nYou may find their profile picture here: http://".$_CONFIG['hostname']."/who.php?username=$target"
               );
           break;
         }

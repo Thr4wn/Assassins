@@ -59,7 +59,7 @@ if (!$e && $complete) {
   <select name="type">
   <option<?=$_POST['type']=='0'?" selected":""?> value="0">Regular</option>
   <option<?=$_POST['type']=='1'?" selected":""?> value="1">Zombies</option>
-  <!--<option<?=$_POST['type']=='2'?" selected":""?> value="2">Circle of Death</option>-->
+  <option<?=$_POST['type']=='2'?" selected":""?> value="2">Circle of Death</option>
   </select>
   <br>
   <label for="name">game name:</label>

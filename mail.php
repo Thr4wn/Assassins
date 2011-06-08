@@ -14,6 +14,8 @@ $showform = false;
 $game = Game::getGame($_GET['id']);
 $sending_user = User::getUser($_GET['username']);
 $type = $_GET['type'];
+if ($type == "")
+  $type = "mailall";
 
 if (!$game)
   setError("Game not found!");

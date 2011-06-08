@@ -13,7 +13,11 @@ $game = Game::getGame($id);
 if ($game) {
 
   $title = $game->getName();
-  $headers = "<meta http-equiv='refresh' content=300>";
+  $headers = "<meta http-equiv='refresh' content=300>
+<style type='text/css'>
+td {vertical-align: bottom;}
+</style>
+";
   include("top.php");
 
 
@@ -64,79 +68,79 @@ if ($game) {
 
 
 
-  // Output the avatar and username
-  function output_player_header($player) {
-    echo "<tr><td>";
-    if ($player->getAva()) {
-      echo "<img src='ava.php?username={$player->getUsername()}' height=48 width=48 alt='Profile Picture'>\n";
-    }
-    echo "<a href='who.php?username={$player->getUsername()}'>";
-    echo "{$player->getFullName()}</a></td>\n";
-  }
-
-
-  // Output the last bit of information about the player
-  function output_player_footer($game, $player) {
-    if ($game->getType() == Game::ZOMBIES && $game->started()) {
-      // 1st column
-      echo "<td style=\"width: 0px\">\n";
-      echo "killed:&nbsp;{$game->getKillCount($player->getUsername())}<br>\n";
-      echo "infested:&nbsp;{$game->getInfestationCount($player->getUsername())}</td>\n";
-
-      if (!$game->ended() && $player->isLoggedIn()) {
-
-        // 3rd column
-        if ($game->isDead($player))
-          echo "<td><a href='zomkill.php?id={$game->getId()}'>[increment human<br>infestation count]</a></td>\n";
-        else
-          echo "<td><a href='zomkill.php?id={$game->getId()}'>[increment zombie<br>kill count]</a></td>\n";
-
-      }
-    }
-
-    if ($player->isLoggedIn() && $game->started() && !$game->ended() && $game->isAlive($player))
-      echo "<td><a href='mark.php?id={$game->getId()}'>[mark as dead]</a></td>\n";
-    echo "</tr>\n";
-  }
-
-
-  // Output all the alive players in the game
-  function output_alive_players($game) {
-    foreach ($game->getAlivePlayers() as $player) {
-      output_player_header($player); // 1st column
-
-      echo "<td><span class='alive'>still alive</span></td>"; // 2nd column
-
-      if ($game->getType()==Game::REGULAR && $game->isAssassin($player) && $game->ended())
-        echo "<td><span class='assassin'>was an assassin!</span></td>"; // 3rd column
-      else
-        echo "<td></td>"; // 3rd column
-
-      output_player_footer($game, $player);
-    }
-  }
-
-
-  // Output all the dead players in the game
-  function output_dead_players($game) {
-    foreach ($game->getDeadPlayers() as $player) {
-      output_player_header($player); // 1st column
-
-      echo "<td><span class='dead'>died: ".date("Y-m-d H:i", strtotime($game->deathTime($player)))."</span></td>"; // 2nd column
-
-      if ($game->getType() == Game::REGULAR && $game->isAssassin($player)) {
-        echo "\t<td><span class='assassin'>was an assassin!</span></td>"; // 3rd column
-
-      } else if ($game->getType() == Game::ZOMBIES) {
-        echo "\t<td style=\"width: 0px\">";
-        if ($game->isAssassin($player))
-          echo "<span class='assassin'>(initial zombie)</span>";
-        echo "</td>";   // 3rd column
-      }
-
-      output_player_footer($game, $player);
-    }
-  }
+#  // Output the avatar and username
+#  function output_player_header($player) {
+#    echo "<tr><td>";
+#    if ($player->getAva()) {
+#      echo "<img src='ava.php?username={$player->getUsername()}' height=48 width=48 alt='Profile Picture'>\n";
+#    }
+#    echo "<a href='who.php?username={$player->getUsername()}'>";
+#    echo "{$player->getFullName()}</a></td>\n";
+#  }
+#
+#
+#  // Output the last bit of information about the player
+#  function output_player_footer($game, $player) {
+#    if ($game->getType() == Game::ZOMBIES && $game->started()) {
+#      // 1st column
+#      echo "<td style=\"width: 0px\">\n";
+#      echo "killed:&nbsp;{$game->getKillCount($player->getUsername())}<br>\n";
+#      echo "infested:&nbsp;{$game->getInfestationCount($player->getUsername())}</td>\n";
+#
+#      if (!$game->ended() && $player->isLoggedIn()) {
+#
+#        // 3rd column
+#        if ($game->isDead($player))
+#          echo "<td><a href='zomkill.php?id={$game->getId()}'>[increment human<br>infestation count]</a></td>\n";
+#        else
+#          echo "<td><a href='zomkill.php?id={$game->getId()}'>[increment zombie<br>kill count]</a></td>\n";
+#
+#      }
+#    }
+#
+#    if ($player->isLoggedIn() && $game->started() && !$game->ended() && $game->isAlive($player))
+#      echo "<td><a href='mark.php?id={$game->getId()}'>[mark as dead]</a></td>\n";
+#    echo "</tr>\n";
+#  }
+#
+#
+#  // Output all the alive players in the game
+#  function output_alive_players($game) {
+#    foreach ($game->getAlivePlayers() as $player) {
+#      output_player_header($player); // 1st column
+#
+#      echo "<td><span class='alive'>still alive</span></td>"; // 2nd column
+#
+#      if ($game->getType()==Game::REGULAR && $game->isAssassin($player) && $game->ended())
+#        echo "<td><span class='assassin'>was an assassin!</span></td>"; // 3rd column
+#      else
+#        echo "<td></td>"; // 3rd column
+#
+#      output_player_footer($game, $player);
+#    }
+#  }
+#
+#
+#  // Output all the dead players in the game
+#  function output_dead_players($game) {
+#    foreach ($game->getDeadPlayers() as $player) {
+#      output_player_header($player); // 1st column
+#
+#      echo "<td><span class='dead'>died: ".date("Y-m-d H:i", strtotime($game->deathTime($player)))."</span></td>"; // 2nd column
+#
+#      if ($game->getType() == Game::REGULAR && $game->isAssassin($player)) {
+#        echo "\t<td><span class='assassin'>was an assassin!</span></td>"; // 3rd column
+#
+#      } else if ($game->getType() == Game::ZOMBIES) {
+#        echo "\t<td style='width:0px'>";
+#        if ($game->isAssassin($player))
+#          echo "<span class='assassin'>(initial zombie)</span>";
+#        echo "</td>";   // 3rd column
+#      }
+#
+#      output_player_footer($game, $player);
+#    }
+#  }
 
 
   //
@@ -168,7 +172,7 @@ if ($game) {
 
   // Was an assassin or initial zombie
   function output_column_3($game,$player) {
-    echo "<td style='width: 0px'>";
+    echo "<td style='width:0px'>";
 
     if ($game->getType() == Game::REGULAR && $game->isAssassin($player) && ($game->ended() || $game->isDead($player)))
       echo "<span class='assassin'>was an assassin!</span>";
@@ -181,7 +185,7 @@ if ($game) {
   // Killed/Infested count
   function output_column_4($game,$player) {
     if ($game->getType() == Game::ZOMBIES && $game->started()) {
-      echo "<td style=\"width: 0px\">\n";
+      echo "<td style='width:0px'>\n";
 
       echo "killed:&nbsp;{$game->getKillCount($player->getUsername())}<br>\n";
       echo "infested:&nbsp;{$game->getInfestationCount($player->getUsername())}\n";
