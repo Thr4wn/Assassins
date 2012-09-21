@@ -29,9 +29,10 @@
 
       if ($success) {
         $text .= "<br/><br/>This error has been reported. Sorry for the inconvenience.";
+      } else {
+        $text .= "<br/><br/>Please report this problem to whoever is in charge.";
       }
 
-      #echo "<script type='text/javascript'>\ndocument.body.innerHTML=\"$text\";\n</script>";
       echo "$text";
       exit;
     }

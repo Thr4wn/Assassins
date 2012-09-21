@@ -41,13 +41,16 @@ $_CONFIG['db_serv'] = ;
 $_CONFIG['db_user'] = ;
 $_CONFIG['db_pass'] = ;
 $_CONFIG['db_database'] = ;
-$_CONFIG['email'] = ;
-$_CONFIG['addheaders'] = ;
-$_CONFIG['publickey'] = ;
-$_CONFIG['privatekey'] = ;
+
 $_CONFIG['hostname'] = ;
 $_CONFIG['cas_server'] = ;
 $_CONFIG['cas_port'] = ;
 $_CONFIG['cas_dir'] = ;
+
+$_CONFIG['email'] = ; #This is the administrator email. Will receive any submitted comments and any errors.
+$_CONFIG['addheaders'] = ; #This is any additional email headers wich will be added to any `mail` calls. See the "additional_headers" option for the `mail` function here: http://php.net/manual/en/function.mail.php
 $_CONFIG['admin_usernames'] = ;
+
+$_CONFIG['publickey'] = ; #used by recaptcha
+$_CONFIG['privatekey'] = ; #used by recaptcha
 
