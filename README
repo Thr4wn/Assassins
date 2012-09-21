@@ -7,9 +7,11 @@ create another file (like staging.php) and have config.php simply include that
 other file. That way, the other config file can be in source code since
 config.php is never supposed to be.
 
-You must also import the assassins_db.sql into the mysql database.
+You must also import the assassins_db.sql into the mysql database. You are
+responsible for creating the database and sql users.
 
-You can also setup recaptcha.
+You can also setup the Google recaptcha. I don't know how to do that right now,
+so you'd have to figure that out yourself. ;)
 
 
 NOTES
