@@ -1,2 +1,14 @@
+
+INSTALL
+======
+
+You must make a config.php file. Either base it off of config.example.php, or
+create another file (like staging.php) and have config.php simply include that
+other file. That way, the other config file can be in source code since
+config.php is never supposed to be.
+
+AUTHORS
+=====
 original code by Denaje: https://github.com/denaje/Assassins
 forked by Thr4wn: https://github.com/denaje/Assassins
+
