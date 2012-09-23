@@ -17,7 +17,7 @@
       $this->populate($username);
     }
 
-    private function Populate($username) {
+    private function populate($username) {
       if ($username == null) return;
 
       $this->username = $username;

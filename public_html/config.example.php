@@ -49,7 +49,7 @@ $_CONFIG['cas_dir'] = ;
 
 $_CONFIG['email'] = ; #This is the administrator email. Will receive any submitted comments and any errors.
 $_CONFIG['addheaders'] = ; #This is any additional email headers wich will be added to any `mail` calls. See the "additional_headers" option for the `mail` function here: http://php.net/manual/en/function.mail.php
-$_CONFIG['admin_usernames'] = ;
+$_CONFIG['admin_usernames'] = ; #this needs to be an array of strings (even if only one).
 
 $_CONFIG['publickey'] = ; #used by recaptcha
 $_CONFIG['privatekey'] = ; #used by recaptcha

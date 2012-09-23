@@ -16,7 +16,7 @@ $_CONFIG['cas_dir'] = 'cas';
 
 $_CONFIG['email'] = 'seth.a.bird@gmail.com';
 $_CONFIG['addheaders'] = '';
-$_CONFIG['admin_usernames'] = 'seth_bird';
+$_CONFIG['admin_usernames'] = array('seth_bird');
 
 $_CONFIG['publickey'] = '';
 $_CONFIG['privatekey'] = '';
